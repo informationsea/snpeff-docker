@@ -1,8 +1,11 @@
 #!/bin/bash
 
-sed -e 's/DB_VERSION/hg19/' Dockerfile-template > Dockerfile.hg19
-sed -e 's/DB_VERSION/hg38/' Dockerfile-template > Dockerfile.hg38
-sed -e 's/DB_VERSION/GRCh37.75/' Dockerfile-template > Dockerfile.GRCh37.75
-sed -e 's/DB_VERSION/GRCh38.86/' Dockerfile-template > Dockerfile.GRCh38.86
-sed -e 's/DB_VERSION/GRCh37.p13.RefSeq/' Dockerfile-template > Dockerfile.GRCh37.p13.RefSeq
-sed -e 's/DB_VERSION/GRCh38.p7.RefSeq/' Dockerfile-template > Dockerfile.GRCh38.p7.RefSeq
+sed -e 's/__GENOME_VERSION__/GRCh38.p13/' Dockerfile-template | \
+    sed -e 's/__GENCODE_VERSION__/32/' | sed -e 's/__DOWNLOAD_PREFIX__//' | \
+    sed -e 's/__GENCODE_TYPE__/.basic/' \
+    > Dockerfile.GENOCDE32.GRCh38.p13.basic
+
+sed -e 's/__GENOME_VERSION__/GRCh37.primary_assembly/' Dockerfile-template | \
+    sed -e 's/__GENCODE_VERSION__/32/' | sed -e 's|__DOWNLOAD_PREFIX__|GRCh37_mapping/|' | \
+    sed -e 's/__GENCODE_TYPE__/lift37.basic/' \
+    > Dockerfile.GENOCDE32.GRCh37.primary_assembly.basic
