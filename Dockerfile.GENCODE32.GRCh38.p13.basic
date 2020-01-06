@@ -43,7 +43,7 @@ ENV GENCODE_VERSION=32
 ENV GENCODE_TYPE=.basic
 RUN echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/snpEff.jar "${@}"' > /usr/bin/snpEff && chmod +x /usr/bin/snpEff && \
     echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/SnpSift.jar "${@}"' > /usr/bin/SnpSift && chmod +x /usr/bin/SnpSift && \
-    echo "GENCODE${GENCODE_VERSION}.${GENOME_VERSION}.genome" >> /opt/snpEff/snpEff.config && \
+    echo "GENCODE${GENCODE_VERSION}.${GENOME_VERSION}.genome : Homo_sapiens" >> /opt/snpEff/snpEff.config && \
     mkdir -p /opt/snpEff/data/GENCODE${GENCODE_VERSION}.${GENOME_VERSION}
 COPY --from=download-genome /${GENOME_VERSION}.genome.fa /opt/snpEff/data/GENCODE${GENCODE_VERSION}.${GENOME_VERSION}/sequences.fa
 COPY --from=download-gencode /gencode.v${GENCODE_VERSION}${GENCODE_TYPE}.annotation.gtf.gz /opt/snpEff/data/GENCODE${GENCODE_VERSION}.${GENOME_VERSION}/genes.gtf.gz
