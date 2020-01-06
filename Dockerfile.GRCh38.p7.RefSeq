@@ -1,0 +1,31 @@
+FROM alpine:3.10 AS download-snpeff
+RUN apk add curl libarchive-tools
+RUN curl -OL https://downloads.sourceforge.net/project/snpeff/snpEff_v4_3t_core.zip
+RUN bsdtar xf snpEff_v4_3t_core.zip
+
+FROM alpine:3.10 AS download-bcftools
+RUN apk add curl libarchive-tools
+ENV BCFTOOLS_VERSION=1.10.2
+RUN curl -OL https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
+RUN bsdtar xf bcftools-${BCFTOOLS_VERSION}.tar.bz2
+
+FROM alpine:3.10 AS buildenv-bcftools
+RUN apk add gcc make libc-dev ncurses-dev bzip2-dev zlib-dev curl-dev curl xz-dev
+ENV BCFTOOLS_VERSION=1.10.2
+COPY --from=download-bcftools /bcftools-${BCFTOOLS_VERSION} /bcftools-${BCFTOOLS_VERSION}
+WORKDIR /bcftools-${BCFTOOLS_VERSION}
+RUN ./configure --prefix=/usr
+RUN make -j4
+RUN make install DESTDIR=/dest
+
+FROM alpine:3.10
+RUN apk add --no-cache bash openjdk8-jre nss ncurses libbz2 zlib libcurl xz-libs
+COPY --from=download-snpeff /snpEff /opt/snpEff
+COPY --from=buildenv-bcftools /dest /
+ENV JAVA_OPTIONS -Xmx4g
+RUN echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/snpEff.jar "${@}"' > /usr/bin/snpEff && chmod +x /usr/bin/snpEff && \
+    echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/SnpSift.jar "${@}"' > /usr/bin/SnpSift && chmod +x /usr/bin/SnpSift && \
+    snpEff download GRCh38.p7.RefSeq
+
+ADD run.sh /run.sh
+ENTRYPOINT [ "/bin/bash", "/run.sh" ]
