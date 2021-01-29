@@ -6,27 +6,27 @@ RUN bsdtar xf snpEff_v4_3t_core.zip
 FROM alpine:3.10 AS download-genome
 RUN apk add curl gzip
 ENV GENOME_VERSION=GRCh38.p13
-ENV GENCODE_VERSION=34
+ENV GENCODE_VERSION=36
 ENV DOWNLOAD_PREFIX=
 RUN curl -OL ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${GENCODE_VERSION}/${DOWNLOAD_PREFIX}${GENOME_VERSION}.genome.fa.gz
 RUN gzip -d ${GENOME_VERSION}.genome.fa.gz
 
 FROM alpine:3.10 AS download-gencode
 RUN apk add curl gzip
-ENV GENCODE_VERSION=34
+ENV GENCODE_VERSION=36
 ENV GENCODE_TYPE=.basic
 ENV DOWNLOAD_PREFIX=
 RUN curl -OL ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${GENCODE_VERSION}/${DOWNLOAD_PREFIX}gencode.v${GENCODE_VERSION}${GENCODE_TYPE}.annotation.gtf.gz
 
 FROM alpine:3.10 AS download-bcftools
 RUN apk add curl libarchive-tools
-ENV BCFTOOLS_VERSION=1.10.2
+ENV BCFTOOLS_VERSION=1.11
 RUN curl -OL https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
 RUN bsdtar xf bcftools-${BCFTOOLS_VERSION}.tar.bz2
 
 FROM alpine:3.10 AS buildenv-bcftools
 RUN apk add gcc make libc-dev ncurses-dev bzip2-dev zlib-dev curl-dev curl xz-dev
-ENV BCFTOOLS_VERSION=1.10.2
+ENV BCFTOOLS_VERSION=1.11
 COPY --from=download-bcftools /bcftools-${BCFTOOLS_VERSION} /bcftools-${BCFTOOLS_VERSION}
 WORKDIR /bcftools-${BCFTOOLS_VERSION}
 RUN ./configure --prefix=/usr
@@ -39,7 +39,7 @@ COPY --from=download-snpeff /snpEff /opt/snpEff
 COPY --from=buildenv-bcftools /dest /
 ENV JAVA_OPTIONS -Xmx4g
 ENV GENOME_VERSION=GRCh38.p13
-ENV GENCODE_VERSION=34
+ENV GENCODE_VERSION=36
 ENV GENCODE_TYPE=.basic
 RUN echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/snpEff.jar "${@}"' > /usr/bin/snpEff && chmod +x /usr/bin/snpEff && \
     echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/SnpSift.jar "${@}"' > /usr/bin/SnpSift && chmod +x /usr/bin/SnpSift && \

@@ -20,13 +20,13 @@ RUN curl -OL ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${G
 
 FROM alpine:3.10 AS download-bcftools
 RUN apk add curl libarchive-tools
-ENV BCFTOOLS_VERSION=1.10.2
+ENV BCFTOOLS_VERSION=1.11
 RUN curl -OL https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
 RUN bsdtar xf bcftools-${BCFTOOLS_VERSION}.tar.bz2
 
 FROM alpine:3.10 AS buildenv-bcftools
 RUN apk add gcc make libc-dev ncurses-dev bzip2-dev zlib-dev curl-dev curl xz-dev
-ENV BCFTOOLS_VERSION=1.10.2
+ENV BCFTOOLS_VERSION=1.11
 COPY --from=download-bcftools /bcftools-${BCFTOOLS_VERSION} /bcftools-${BCFTOOLS_VERSION}
 WORKDIR /bcftools-${BCFTOOLS_VERSION}
 RUN ./configure --prefix=/usr
