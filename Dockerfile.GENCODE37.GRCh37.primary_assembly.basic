@@ -6,14 +6,14 @@ RUN bsdtar xf snpEff_v4_3t_core.zip
 FROM alpine:3.10 AS download-genome
 RUN apk add curl gzip
 ENV GENOME_VERSION=GRCh37.primary_assembly
-ENV GENCODE_VERSION=36
+ENV GENCODE_VERSION=37
 ENV DOWNLOAD_PREFIX=GRCh37_mapping/
 RUN curl -OL ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${GENCODE_VERSION}/${DOWNLOAD_PREFIX}${GENOME_VERSION}.genome.fa.gz
 RUN gzip -d ${GENOME_VERSION}.genome.fa.gz
 
 FROM alpine:3.10 AS download-gencode
 RUN apk add curl gzip
-ENV GENCODE_VERSION=36
+ENV GENCODE_VERSION=37
 ENV GENCODE_TYPE=lift37.basic
 ENV DOWNLOAD_PREFIX=GRCh37_mapping/
 RUN curl -OL ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${GENCODE_VERSION}/${DOWNLOAD_PREFIX}gencode.v${GENCODE_VERSION}${GENCODE_TYPE}.annotation.gtf.gz
@@ -39,7 +39,7 @@ COPY --from=download-snpeff /snpEff /opt/snpEff
 COPY --from=buildenv-bcftools /dest /
 ENV JAVA_OPTIONS -Xmx4g
 ENV GENOME_VERSION=GRCh37.primary_assembly
-ENV GENCODE_VERSION=36
+ENV GENCODE_VERSION=37
 ENV GENCODE_TYPE=lift37.basic
 RUN echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/snpEff.jar "${@}"' > /usr/bin/snpEff && chmod +x /usr/bin/snpEff && \
     echo 'java ${JAVA_OPTIONS} -jar /opt/snpEff/SnpSift.jar "${@}"' > /usr/bin/SnpSift && chmod +x /usr/bin/SnpSift && \
